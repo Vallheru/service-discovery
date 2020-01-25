@@ -7,9 +7,10 @@ import (
 )
 
 func main() {
-    region      := flag.String("region", "us-east-1", "Region of AWS service")
-    asgName     := flag.String("asg-name", "", "Autoscalling group name")
-    outputValue := flag.String("output-value", "private-ip", "One of the: private-ip, public-ip")
+    region       := flag.String("region", "us-east-1", "Region of AWS service")
+    asgName      := flag.String("asg-name", "", "Autoscalling group name")
+    outputField  := flag.String("field", "all", "One of the: all, private-ip, public-ip")
+    outputFormat := flag.String("format", "text", "Text format")
     flag.Parse()
 
     input := &ServiceDiscoveryInput{
@@ -29,16 +30,18 @@ func main() {
         os.Exit(2)
     }
 
-    switch *outputValue {
-    case "private-ip":
-        for _, item := range result {
-            fmt.Println(item.PrivateIP)
-        }
-
-    default:
-        for _, item := range result {
-            fmt.Println(item.PublicIP)
-        }
+    var formatter OutputFormatter
+    if (*outputFormat == "json") {
+        formatter = JSONFormatter{}
+    } else {
+        formatter = TextFormatter{Field: *outputField}
     }
-    
+
+    res, err2 := formatter.Format(&result)
+    if err2 != nil {
+        fmt.Println(err1.Error())
+        os.Exit(3)
+    }
+
+    fmt.Println(res)
 }
