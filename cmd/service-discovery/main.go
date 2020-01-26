@@ -13,6 +13,11 @@ func main() {
     outputFormat := flag.String("format", "text", "Text format")
     flag.Parse()
 
+    if *asgName == "" {
+        flag.Usage()
+        os.Exit(255)
+    }
+
     input := &ServiceDiscoveryInput{
         Region:  *region,
         AsgName: *asgName,
